@@ -1,4 +1,3 @@
-StudyFocus
 StudyFocus is a minimalist productivity web application built to help users manage tasks, run focused study sessions, and track progress in a single place. It combines a task manager, a customizable Pomodoro timer, and Spotify playlist integration into a simple interface designed for everyday use.
 The application allows users to create tasks, select an active task, and start a timed session. The timer supports a default duration as well as custom input, and once a session is completed, the data is stored locally along with the associated task and timestamp. All task and session data is stored in the browser using localStorage, so no backend or database is required.
 Spotify integration is handled through an embedded player. Users can paste a playlist link, which is converted into an iframe embed so music can be played directly within the application without leaving the page. This keeps the workflow uninterrupted and avoids switching between tabs or apps.
