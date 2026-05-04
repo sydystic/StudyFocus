@@ -42,14 +42,8 @@ export default function StudyFocusPage() {
       </main>
 
       <footer className="py-6 border-t border-white/8 text-center flex flex-col gap-2">
-        <p className="text-xs text-white/25">© 2024 StudyFlow OS. Minimalist Productivity.</p>
-        <nav className="flex justify-center gap-5">
-          {["Privacy", "Terms", "Support"].map(link => (
-            <a key={link} href="#" className="text-xs text-white/35 hover:text-white/60 transition-colors">
-              {link}
-            </a>
-          ))}
-        </nav>
+        <p className="text-xs text-white/25">studyfocus. minimalist productivity.</p>
+        <p className="text-xs text-white/25">made by siddhi.</p>
       </footer>
 
     </div>
