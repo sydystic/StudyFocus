@@ -14,10 +14,39 @@ function saveSession(session: Session) {
   localStorage.setItem("sessions", JSON.stringify(existing))
 }
 
+function getRecentSessions(): Session[] {
+  try { return JSON.parse(localStorage.getItem("sessions") || "[]") } catch { return [] }
+}
+
 function fmt(s: number) {
   const m = Math.floor(s / 60)
   const sec = s % 60
   return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+}
+
+async function fetchSessionSummary(task: string, sessions: Session[]): Promise<string> {
+  const recentCount = sessions.filter(
+    s => s.task === task && Date.now() - new Date(s.date).getTime() < 86400000
+  ).length
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `Generate a single motivating study session summary. Max 15 words. No filler. Be specific and suggest a concrete next step.
+Task: "${task}". Sessions completed on this task today: ${recentCount}.`
+          }]
+        }],
+        generationConfig: { temperature: 0.8, maxOutputTokens: 60 }
+      }),
+    }
+  )
+  const data = await res.json()
+  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ""
 }
 
 export function PomodoroTimer({ selectedTask }: { selectedTask: string | null }) {
@@ -25,6 +54,8 @@ export function PomodoroTimer({ selectedTask }: { selectedTask: string | null })
   const [editingDuration, setEditingDuration] = useState(false)
   const [remaining, setRemaining] = useState(25 * 60)
   const [running, setRunning] = useState(false)
+  const [summary, setSummary] = useState<string | null>(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
   const endTimeRef = useRef<number | null>(null)
   const rafRef = useRef<number | null>(null)
   const sessionStartRef = useRef<number | null>(null)
@@ -41,8 +72,16 @@ export function PomodoroTimer({ selectedTask }: { selectedTask: string | null })
       setRunning(false)
       if (sessionStartRef.current && selectedTask) {
         const duration = Math.round((Date.now() - sessionStartRef.current) / 1000)
-        saveSession({ task: selectedTask, duration, date: new Date().toISOString() })
+        const session = { task: selectedTask, duration, date: new Date().toISOString() }
+        saveSession(session)
         sessionStartRef.current = null
+
+        setSummaryLoading(true)
+        setSummary(null)
+        fetchSessionSummary(selectedTask, getRecentSessions())
+          .then(s => { if (s) setSummary(s) })
+          .catch(() => { })
+          .finally(() => setSummaryLoading(false))
       }
     }
   }, [selectedTask])
@@ -64,13 +103,19 @@ export function PomodoroTimer({ selectedTask }: { selectedTask: string | null })
     setRemaining(clamped * 60)
     setRunning(false)
     sessionStartRef.current = null
+    setSummary(null)
   }
 
   const toggle = () => { if (remaining > 0) setRunning(r => !r) }
-  const reset  = () => { setRunning(false); setRemaining(TOTAL); sessionStartRef.current = null }
+  const reset = () => {
+    setRunning(false)
+    setRemaining(TOTAL)
+    sessionStartRef.current = null
+    setSummary(null)
+  }
 
-  const done   = remaining === 0
-  const circ   = 2 * Math.PI * 90
+  const done = remaining === 0
+  const circ = 2 * Math.PI * 90
   const offset = circ * (remaining / TOTAL)
 
   return (
@@ -94,63 +139,36 @@ export function PomodoroTimer({ selectedTask }: { selectedTask: string | null })
           {editingDuration ? (
             <div className="flex flex-col items-center gap-1.5">
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => applyMinutes(customMinutes - 5)}
-                  className="w-7 h-7 rounded-full border border-white/20 text-white/60
-                             hover:border-[#7c6ff7]/60 hover:text-white
-                             flex items-center justify-center transition-all active:scale-90"
-                >
-                  −
-                </button>
+                <button onClick={() => applyMinutes(customMinutes - 5)}
+                  className="w-7 h-7 rounded-full border border-white/20 text-white/60 hover:border-[#7c6ff7]/60 hover:text-white flex items-center justify-center transition-all active:scale-90">−</button>
                 <span className="font-mono text-4xl font-light text-white tabular-nums w-14 text-center">
                   {String(customMinutes).padStart(2, "0")}
                 </span>
-                <button
-                  onClick={() => applyMinutes(customMinutes + 5)}
-                  className="w-7 h-7 rounded-full border border-white/20 text-white/60
-                             hover:border-[#7c6ff7]/60 hover:text-white
-                             flex items-center justify-center transition-all active:scale-90"
-                >
-                  +
-                </button>
+                <button onClick={() => applyMinutes(customMinutes + 5)}
+                  className="w-7 h-7 rounded-full border border-white/20 text-white/60 hover:border-[#7c6ff7]/60 hover:text-white flex items-center justify-center transition-all active:scale-90">+</button>
               </div>
               <span className="text-[9px] text-white/25 tracking-widest uppercase">minutes</span>
               <div className="flex gap-1">
                 {[15, 25, 45, 60].map(m => (
-                  <button
-                    key={m}
-                    onClick={() => applyMinutes(m)}
+                  <button key={m} onClick={() => applyMinutes(m)}
                     className={`px-2 py-0.5 rounded text-[10px] transition-all active:scale-95
-                      ${customMinutes === m
-                        ? "bg-[#7c6ff7] text-white"
-                        : "bg-white/6 text-white/35 hover:bg-white/10 hover:text-white/60"}`}
-                  >
+                      ${customMinutes === m ? "bg-[#7c6ff7] text-white" : "bg-white/6 text-white/35 hover:bg-white/10 hover:text-white/60"}`}>
                     {m}m
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => setEditingDuration(false)}
-                className="text-[9px] text-[#7c6ff7]/60 hover:text-[#7c6ff7] transition-colors"
-              >
-                Done
-              </button>
+              <button onClick={() => setEditingDuration(false)}
+                className="text-[9px] text-[#7c6ff7]/60 hover:text-[#7c6ff7] transition-colors">Done</button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-1">
-              <span className={`font-mono text-5xl font-light tabular-nums tracking-tight
-                ${done ? "text-emerald-400" : "text-white"}`}>
+              <span className={`font-mono text-5xl font-light tabular-nums tracking-tight ${done ? "text-emerald-400" : "text-white"}`}>
                 {fmt(remaining)}
               </span>
               {!running && !done && (
-                <button
-                  onClick={() => setEditingDuration(true)}
-                  className="text-[10px] text-white/20 hover:text-[#7c6ff7]/60 transition-colors"
-                >
-                  set time
-                </button>
+                <button onClick={() => setEditingDuration(true)}
+                  className="text-[10px] text-white/20 hover:text-[#7c6ff7]/60 transition-colors">set time</button>
               )}
-              {/* selectedTask intentionally NOT shown here */}
             </div>
           )}
         </div>
@@ -158,22 +176,32 @@ export function PomodoroTimer({ selectedTask }: { selectedTask: string | null })
 
       {!editingDuration && (
         <div className="flex items-center gap-3">
-          <button
-            onClick={toggle}
-            disabled={done}
-            className="px-6 py-2.5 rounded-lg bg-[#7c6ff7] text-sm font-medium text-white
-                       hover:bg-[#6a5ef0] active:scale-95 transition-all
-                       disabled:opacity-40 disabled:cursor-not-allowed"
-          >
+          <button onClick={toggle} disabled={done}
+            className="px-6 py-2.5 rounded-lg bg-[#7c6ff7] text-sm font-medium text-white hover:bg-[#6a5ef0] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
             {running ? "Pause" : "Start"}
           </button>
-          <button
-            onClick={reset}
-            className="px-6 py-2.5 rounded-lg border border-white/20 text-sm font-medium text-white
-                       hover:border-white/40 active:scale-95 transition-all"
-          >
+          <button onClick={reset}
+            className="px-6 py-2.5 rounded-lg border border-white/20 text-sm font-medium text-white hover:border-white/40 active:scale-95 transition-all">
             Reset
           </button>
+        </div>
+      )}
+
+      {(summaryLoading || summary) && (
+        <div className="w-full px-4 py-3 rounded-xl bg-[#1a1a1a] border border-[#7c6ff7]/20">
+          {summaryLoading ? (
+            <div className="flex items-center gap-2 text-xs text-white/40">
+              <svg className="animate-spin w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Generating session summary…
+            </div>
+          ) : (
+            <p className="text-xs text-white/60 leading-relaxed">
+              <span className="text-[#7c6ff7]/70 mr-1.5">✦</span>{summary}
+            </p>
+          )}
         </div>
       )}
     </div>
