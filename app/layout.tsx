@@ -15,7 +15,6 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "StudyFocus",
   description: "Focus. Track. Improve.",
-  manifest: "/manifest.json",
 } as Metadata;
 
 export default function RootLayout({
@@ -29,6 +28,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
+        <link rel="manifest" href="/manifest.json" crossOrigin="use-credentials" />
         <link rel="apple-touch-icon" href="/icon.svg" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
