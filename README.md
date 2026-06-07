@@ -1,7 +1,136 @@
-StudyFocus is a minimalist productivity web application built to help users manage tasks, run focused study sessions, and track progress in a single place. It combines a task manager, a customizable Pomodoro timer, and Spotify playlist integration into a simple interface designed for everyday use.
-The application allows users to create tasks, select an active task, and start a timed session. The timer supports a default duration as well as custom input, and once a session is completed, the data is stored locally along with the associated task and timestamp. All task and session data is stored in the browser using localStorage, so no backend or database is required.
-Spotify integration is handled through an embedded player. Users can paste a playlist link, which is converted into an iframe embed so music can be played directly within the application without leaving the page. This keeps the workflow uninterrupted and avoids switching between tabs or apps.
-The app is built as a Progressive Web App, which means it can be installed on mobile devices and desktops. When added to the home screen on iOS or installed in a browser, it opens in standalone mode and behaves like a lightweight native app. Core functionality remains available without a network connection since all data is stored locally.
-The project is developed using Next.js with the App Router, TypeScript for type safety, and Tailwind CSS for styling. PWA functionality is enabled using next-pwa, and the project structure separates components such as the task manager, timer, and Spotify player for maintainability.
-To run the project locally, clone the repository, install dependencies, and start the development server. For full PWA functionality, a production build is required using the standard build and start commands. Deployment is recommended on platforms that support Next.js natively.
-This project is intended for personal productivity use and learning purposes, with a focus on simplicity and usability rather than feature complexity.
+<div align="center">
+
+# 🎯 StudyFocus
+
+### Focus. Track. Improve.
+
+**A minimalist AI-powered study productivity app for students who actually want to get things done.**
+
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-focusonyourstudy.vercel.app-6C63FF?style=for-the-badge)](https://focusonyourstudy.vercel.app/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+[![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://focusonyourstudy.vercel.app/)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=for-the-badge&logo=vercel)](https://vercel.com)
+
+</div>
+
+---
+
+## 🤔 Why StudyFocus?
+
+Most productivity apps are either too bloated or too basic. StudyFocus hits the sweet spot — a clean, distraction-free workspace that combines everything a student needs: a Pomodoro timer, task management, Spotify music, AI study planning, and session analytics. All in one tab. No account needed.
+
+---
+
+## ✨ Features
+
+- ⏱️ **Pomodoro Timer** — customizable session durations, focus mode
+- ✅ **Smart Task Manager** — create, select, and track tasks per session
+- 🤖 **AI Study Planner** — paste a topic, get an AI-generated study breakdown
+- 🎵 **Spotify Integration** — paste any playlist link, play music without switching tabs
+- 📊 **Session Analytics** — track sessions, streaks, and weekly progress
+- 📱 **Installable PWA** — add to home screen on iOS/Android, works offline
+- 💾 **No backend needed** — all data stored locally in the browser
+
+---
+
+## 🎬 Demo
+
+🔗 **Try it live:** [focusonyourstudy.vercel.app](https://focusonyourstudy.vercel.app/)
+
+<!-- Add a screenshot or GIF here -->
+<!-- ![StudyFocus Demo](./assets/demo.gif) -->
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| PWA | next-pwa |
+| AI | LLM integration for study breakdowns |
+| Storage | localStorage (no backend) |
+| Deployment | Vercel |
+
+---
+
+## 📦 Run Locally
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+
+### Steps
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/sydystic/StudyFocus.git
+cd StudyFocus
+
+# 2. Install dependencies
+npm install
+
+# 3. Start development server
+npm run dev
+
+# 4. Open in browser
+# http://localhost:3000
+```
+
+> **Note:** For full PWA functionality (offline support, installability), run a production build:
+> ```bash
+> npm run build && npm start
+> ```
+
+---
+
+## 📁 Project Structure
+
+```
+StudyFocus/
+├── app/                 # Next.js App Router pages & components
+│   ├── components/      # Timer, TaskManager, SpotifyPlayer, Analytics
+│   └── page.tsx         # Main app entry
+├── public/              # Static assets, PWA manifest & icons
+├── next.config.ts       # Next.js + PWA config
+├── tailwind.config.ts   # Tailwind setup
+└── tsconfig.json        # TypeScript config
+```
+
+---
+
+## 📱 Install as an App
+
+StudyFocus is a Progressive Web App — you can install it like a native app:
+
+**On Mobile (iOS/Android):** Open in browser → Share → "Add to Home Screen"
+
+**On Desktop (Chrome/Edge):** Click the install icon in the address bar
+
+Once installed, it opens in standalone mode with no browser UI.
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Cloud sync across devices
+- [ ] Custom Pomodoro presets (25/5, 50/10, etc.)
+- [ ] AI-generated session summaries
+- [ ] Study streak notifications
+- [ ] Export analytics to PDF
+
+---
+
+## 👤 Author
+
+**Siddhi** — [@sydystic](https://github.com/sydystic) · [LinkedIn](https://www.linkedin.com/in/siddhikurne/)
+
+---
+
+
+<div align="center">
+  <sub>Built for students who are tired of switching between 10 tabs just to study.</sub>
+</div>
